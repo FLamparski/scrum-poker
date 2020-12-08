@@ -1,0 +1,168 @@
+service: hackday2020-scrum-poker
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-west-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.dynamoDbVotesTable}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.dynamoDbRoomsTable}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.dynamoDbRoomPlayersTable}"
+  logs:
+    websocket: true
+
+custom:
+  dynamoDbVotesTable: 'tb_votes'
+  dynamoDbRoomsTable: 'tb_rooms'
+  dynamoDbRoomPlayersTable: 'tb_room_players'
+  buckets:
+    STATIC_BUCKET_NAME: ${self:service}-${self:provider.stage}-static
+  s3Sync:
+    - bucketName: ${self:custom.buckets.STATIC_BUCKET_NAME}
+      localDir: dist
+
+functions:  
+  onmessage:
+    handler: handler.onmessage
+    environment:
+      DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
+      DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
+      DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
+    events:
+      - websocket:
+          route: $default
+
+resources:
+  Resources:
+    DynamoDBVotesTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: room
+            AttributeType: S
+          - AttributeName: user
+            AttributeType: S
+        KeySchema:
+          - AttributeName: room
+            KeyType: HASH
+          - AttributeName: user
+            KeyType: RANGE
+        TableName: ${self:custom.dynamoDbVotesTable}
+    DynamoDBRoomsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: room
+            AttributeType: S
+        KeySchema:
+          - AttributeName: room
+            KeyType: HASH
+        TableName: ${self:custom.dynamoDbRoomsTable}
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+    DynamoDBRoomPlayersTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: room
+            AttributeType: S
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: room
+            KeyType: HASH
+          - AttributeName: connectionId
+            KeyType: RANGE
+        TableName: ${self:custom.dynamoDbRoomPlayersTable}
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+    ClientStaticBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.buckets.STATIC_BUCKET_NAME}
+        WebsiteConfiguration:
+          IndexDocument: index.html
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - HEAD
+                - PUT
+                - POST
+                - DELETE
+              MaxAge: 3000
+              ExposedHeaders:
+                - x-amz-server-side-encryption
+                - x-amz-request-id
+                - x-amz-id-2
+    ClientStaticBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: ClientStaticBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement: [
+            {
+              Action: ['s3:GetObject'],
+              Effect: 'Allow',
+              Resource: {
+                Fn::Join: ['', ['arn:aws:s3:::', { Ref: 'ClientStaticBucket' }, '/*']],
+              },
+              Principal: '*'
+            },
+          ]
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-s3-sync
+
+package: # Optional deployment packaging configuration
+  include: # Specify the directories and files which should be included in the deployment package
+    - handler.js
+  exclude:
+    - .git/**
+    - dist/**
+    - .nuxt/**
