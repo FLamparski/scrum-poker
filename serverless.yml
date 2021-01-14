@@ -41,16 +41,27 @@ provider:
     websocket: true
 
 custom:
+  secrets: ${file(.settings/secrets.json)}
   dynamoDbVotesTable: 'tb_votes'
   dynamoDbRoomsTable: 'tb_rooms'
   dynamoDbRoomPlayersTable: 'tb_room_players'
   buckets:
     STATIC_BUCKET_NAME: ${self:service}-${self:provider.stage}-static
-  s3Sync:
-    - bucketName: ${self:custom.buckets.STATIC_BUCKET_NAME}
-      localDir: dist
+  # s3Sync:
+  #   - bucketName: ${self:custom.buckets.STATIC_BUCKET_NAME}
+  #     localDir: dist
+  customDomain:
+    domainName: ${self:custom.secrets.domainName.${self:provider.stage}}
+    basePath: ''
+    endpointType: regional
+    certificateName: '*.scrumpoker.lol'
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+  apigwBinary:
+    types:
+      - '*/*'
 
-functions:  
+functions:
   onmessage:
     handler: handler.onmessage
     environment:
@@ -60,6 +71,12 @@ functions:
     events:
       - websocket:
           route: $default
+
+  nuxt:
+    handler: handler.nuxt
+    events:
+      - http: ANY /
+      - http: ANY /{proxy+}
 
 resources:
   Resources:
@@ -117,8 +134,8 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.buckets.STATIC_BUCKET_NAME}
-        WebsiteConfiguration:
-          IndexDocument: index.html
+        # WebsiteConfiguration:
+        #   IndexDocument: index.html
         CorsConfiguration:
           CorsRules:
             -
@@ -157,12 +174,13 @@ resources:
 
 plugins:
   - serverless-plugin-typescript
-  - serverless-s3-sync
+#  - serverless-s3-sync
+  - serverless-domain-manager
+  - serverless-apigw-binary
 
 package: # Optional deployment packaging configuration
   include: # Specify the directories and files which should be included in the deployment package
     - handler.js
+    - .nuxt/**
   exclude:
     - .git/**
-    - dist/**
-    - .nuxt/**

@@ -6,6 +6,14 @@ import {
 import { sample } from 'lodash';
 import { ClearVotesMessage, VoteMessage, WSMessage, WSMessageType } from './ws-messages';
 
+import slsHttp from 'serverless-http';
+import binaryMimeTypes from './binaryMimeTypes';
+import nuxtApp from './nuxt';
+
+export const nuxt = slsHttp(nuxtApp, {
+    binary: binaryMimeTypes,
+});
+
 const dynamoDb = new DynamoDB.DocumentClient();
 
 export async function connect(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
