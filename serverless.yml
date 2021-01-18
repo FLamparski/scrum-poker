@@ -63,7 +63,7 @@ custom:
 
 functions:
   onmessage:
-    handler: handler.onmessage
+    handler: handler.websocketMessageHandler
     environment:
       DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
       DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
@@ -73,7 +73,7 @@ functions:
           route: $default
 
   nuxt:
-    handler: handler.nuxt
+    handler: handler.nuxtHandler
     events:
       - http: ANY /
       - http: ANY /{proxy+}
@@ -182,5 +182,6 @@ package: # Optional deployment packaging configuration
   include: # Specify the directories and files which should be included in the deployment package
     - handler.js
     - .nuxt/**
+    - src/**
   exclude:
     - .git/**
