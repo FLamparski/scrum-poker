@@ -1,46 +1,61 @@
 <template>
-    <div>
-        <p>Connected: {{ connected }}</p>
-        <p>Room name: {{ roomName }}</p>
-        <div v-if="!roomName">
-            <label for="playerNameInput">Enter player name</label>
-            <input type="text" id="playerNameInput" v-model="playerNameInputValue">
-
-            <label for="roomNameInput">Enter room  name:</label>
-            <input type="text" id="roomNameInput" v-model="roomNameInputValue">
-            
-            <button type="button" @click="onJoinRoomClick">Join room</button>
+    <div
+        v-if="roomName != null"
+        class="player-view">
+        <header-bar
+            :connected="connected"
+            :roomName="roomName" />
+        
+        <div class="choices">
+            <button
+                v-for="voteOption in VoteOptions"
+                :key="voteOption.key"
+                :class="{ 'selected': currentVote === voteOption.key }"
+                class="choice"
+                type="button"
+                @click="onVote(voteOption.key)">
+                {{ voteOption.value }}
+            </button>
         </div>
-        <div v-else>
-            <p>Current vote: {{ currentVote }}</p>
-            <p>
-                <button
-                    v-for="option in VOTE_OPTIONS"
-                    :key="option.key"
-                    type="button"
-                    @click="onVote(option.key)">
-                    {{ option.value }}
-                </button>
-            </p>
-        </div>
+    </div>
+    <div
+        v-else
+        class="room-login-view">
+        <h1>🃏 join room</h1>
+        <fieldset>
+            <label for="roomNameInput">Room Code</label>
+            <input
+                v-model="roomNameInputValue"
+                placeholder="XKCD"
+                type="text"
+                name="roomNameInput"
+                id="roomNameInput">
+        </fieldset>
+        <fieldset>
+            <label for="playerNameInput">Your Name</label>
+            <input
+                v-model="playerNameInputValue"
+                placeholder="Mary Shelley"
+                type="text"
+                name="playerNameInput"
+                id="playerNameInput">
+        </fieldset>
+        <button
+            type="button"
+            class="join-button"
+            :disabled="joinDisabled"
+            @click="onJoinRoomClick">Join</button>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { JoinRoomMessage, VoteMessage, WSMessage, WSMessageType } from '../../ws-messages';
-
-const VOTE_OPTIONS = [
-    { key: 0, value: 0 },
-    { key: 1, value: 1 },
-    { key: 2, value: 2 },
-    { key: 3, value: 3 },
-    { key: 5, value: 5 },
-    { key: 8, value: 8 },
-    { key: 13, value: 13 },
-];
+import { JoinRoomMessage, VoteMessage, WSMessage, WSMessageType } from '../../src/models/ws-messages';
+import HeaderBar from '../components/HeaderBar.vue';
+import VoteOptions from '../VoteOptions';
 
 export default {
+    components: { HeaderBar },
     data: () => ({
         connected: false,
         roomName: null,
@@ -49,7 +64,7 @@ export default {
         roomNameInputValue: '',
 
         currentVote: null,
-        VOTE_OPTIONS,
+        VoteOptions,
     }),
     mounted() {
         this.socket = new WebSocket('wss://jn2jpcj5o2.execute-api.eu-west-2.amazonaws.com/dev/');
@@ -58,6 +73,11 @@ export default {
     },
     beforeDestroy() {
         this.socket.close();
+    },
+    computed: {
+        joinDisabled(): boolean {
+            return this.playerNameInputValue == '' || this.roomNameInputValue == '';
+        },
     },
     methods: {
         socketOpened() {
@@ -96,3 +116,51 @@ export default {
     },
 };
 </script>
+
+
+<style scoped>
+.room-login-view {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.room-login-view > fieldset {
+    border: none;
+    min-height: 48px;
+}
+
+.room-login-view > fieldset + fieldset {
+    margin-top: 10px;
+}
+
+.room-login-view > fieldset > input {
+    display: block;
+    font-size: 20px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.join-button {
+    margin-top: 10px;
+    height: 48px;
+}
+
+.choices {
+    display: flex;
+    justify-content: center;
+}
+
+.choices > .choice {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+    margin: 0 5px;
+}
+
+.choice.selected {
+    box-shadow: 0px 0px 5px 2px #3fafaf;
+}
+</style>

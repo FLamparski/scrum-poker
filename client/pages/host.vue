@@ -1,24 +1,47 @@
 <template>
-    <div>
-        <p>Connected: {{ connected }}</p>
-        <p>Room name: {{ roomName }}</p>
-        <p>Players: {{ players }}</p>
-        <p>Votes: {{ votes }}</p>
-        <p>
-            <button type="button" @click="onClearVotesClick">Clear votes</button>
-        </p>
+    <div class="host-view">
+        <header-bar
+            :room-name="roomName"
+            :connected="connected">
+            <button
+                type="button"
+                @click="() => cardsRevealed = !cardsRevealed">
+                {{ cardsRevealed ? 'Hide' : 'Reveal' }} Votes
+            </button>
+            <button
+                type="button"
+                @click="onClearVotesClick">
+                Clear
+            </button>
+        </header-bar>
+
+        <div class="cards-layout">
+            <card
+                v-for="playerName in players"
+                :key="playerName"
+                :player-name="playerName"
+                :value="-1"
+                :revealed="cardsRevealed" />
+        </div>
     </div>
 </template>
 
 <script lang="ts">
-import { ClearVotesMessage, WSMessage, WSMessageType } from '../../ws-messages';
+import { ClearVotesMessage, WSMessage, WSMessageType } from '../../src/models/ws-messages';
+import Card from '../components/Card.vue';
+import HeaderBar from '../components/HeaderBar.vue';
 
 export default {
+    components: {
+        HeaderBar,
+        Card,
+    },
     data: () => ({
         connected: false,
         roomName: null,
         players: [],
         votes: {},
+        cardsRevealed: false,
     }),
     mounted() {
         this.socket = new WebSocket('wss://jn2jpcj5o2.execute-api.eu-west-2.amazonaws.com/dev/');
@@ -59,7 +82,29 @@ export default {
                 roomName: this.roomName,
             };
             this.socket.send(JSON.stringify(message));
+
+            this.cardsRevealed = false;
         },
     },
 }
 </script>
+
+<style scoped>
+.host-view {
+    height: 100%;
+}
+
+.cards-layout {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: calc(100% - 30px);
+}
+
+.cards-layout > .card-group {
+    flex: 0 0 240px;
+    margin: 0 10px;
+}
+</style>

@@ -20,4 +20,8 @@ export default {
     render: {
         compressor: false,
     },
+
+    css: [
+        '~/assets/style.css',
+    ],
 };
