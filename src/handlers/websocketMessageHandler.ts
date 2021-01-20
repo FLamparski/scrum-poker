@@ -70,15 +70,29 @@ async function joinRoom(client: ApiGatewayManagementApi, playerName: string, pla
         return Promise.reject();
     }
 
+    const allRoomPlayers = await findPlayersByRoomName(roomName);
+    const allPlayerNames = allRoomPlayers.map(({ player }) => player);
+
+    if (allPlayerNames.includes(playerName)) {
+        await client.postToConnection({
+            ConnectionId: playerConnectionId,
+            Data: JSON.stringify({
+                type: WSMessageType.PLAYER_JOIN_ERROR,
+                playerName,
+                error: 'There is already someone else using your name in this room'
+            }),
+        }).promise();
+        return;
+    }
+
     await saveRoomPlayer({
         room: roomName,
         player: playerName,
         connectionId: playerConnectionId,
     });
 
-    const allRoomPlayers = await findPlayersByRoomName(roomName);
+    allPlayerNames.push(playerName);
 
-    const allPlayerNames = allRoomPlayers.map(({ player }) => player);
     await client.postToConnection({
         ConnectionId: playerConnectionId,
         Data: JSON.stringify({
