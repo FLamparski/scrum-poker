@@ -20,7 +20,7 @@
                 v-for="playerName in players"
                 :key="playerName"
                 :player-name="playerName"
-                :value="-1"
+                :value="votes[playerName]"
                 :revealed="cardsRevealed" />
         </div>
     </div>
