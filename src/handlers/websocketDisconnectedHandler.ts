@@ -59,7 +59,7 @@ async function removeRoom(client: ApiGatewayManagementApi, room: Room): Promise<
     await deleteRoom(room);
     const allRoomPlayers = await findPlayersByRoomName(room.room);
     await deleteVoteByRoomNameAndPlayerNames(room.room, allRoomPlayers.map(p => p.player));
-    
+
     const wsMessage: RoomDestroyedMessage = {
         type: WSMessageType.ROOM_DESTROYED,
         roomName: room.room,
