@@ -22,6 +22,13 @@ export async function findVotesByRoomName(roomName: string): Promise<Vote[]> {
     return roomVotesResult.Items as Vote[] || [];
 }
 
+export async function deleteVoteByRoomNameAndPlayerName(
+    roomName: string,
+    playerName: string
+): Promise<void> {
+    await deleteVoteByRoomNameAndPlayerNames(roomName, [playerName]);
+}
+
 export async function deleteVoteByRoomNameAndPlayerNames(
     roomName: string,
     playerNames: string[]

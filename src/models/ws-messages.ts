@@ -5,7 +5,10 @@ export const enum WSMessageType {
     CLEAR_VOTES = 'CLEAR_VOTES',
 
     PLAYER_JOINED = 'PLAYER_JOINED',
+    PLAYER_JOIN_ERROR = 'PLAYER_JOIN_ERROR',
+    PLAYER_LEFT = 'PLAYER_LEFT',
     ROOM_CREATED = 'ROOM_CREATED',
+    ROOM_DESTROYED = 'ROOM_DESTROYED',
     VOTES_CLEARED = 'VOTES_CLEARED',
     VOTES_UPDATED = 'VOTES_UPDATED',
 }
@@ -38,8 +41,25 @@ export interface PlayerJoinedMessage {
     allPlayerNames: string[];
 }
 
+export interface PlayerJoinErrorMessage {
+    type: WSMessageType.PLAYER_JOIN_ERROR;
+    playerName: string;
+    error: string;
+}
+
+export interface PlayerLeftMessage {
+    type: WSMessageType.PLAYER_LEFT;
+    playerName: string;
+    allPlayerNames: string[];
+}
+
 export interface RoomCreatedMessage {
     type: WSMessageType.ROOM_CREATED;
+    roomName: string;
+}
+
+export interface RoomDestroyedMessage {
+    type: WSMessageType.ROOM_DESTROYED;
     roomName: string;
 }
 
@@ -60,6 +80,9 @@ export type WSMessage =
     | VoteMessage
     | ClearVotesMessage
     | PlayerJoinedMessage
+    | PlayerJoinErrorMessage
+    | PlayerLeftMessage
     | RoomCreatedMessage
+    | RoomDestroyedMessage
     | VotesUpdatedMessage
     | VotesClearedMessage;

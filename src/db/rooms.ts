@@ -15,13 +15,40 @@ export async function findRoomByName(roomName: string): Promise<Room | undefined
     }
 }
 
+export async function findRoomByConnectionId(connectionId: string): Promise<Room | undefined> {
+    const result = await dynamoDb.scan({
+        TableName: TABLE_NAME,
+        FilterExpression: 'connectionId = :connectionId',
+        ExpressionAttributeValues: {
+            ':connectionId': connectionId,
+        },
+    }).promise();
+
+    if (result.Count == null) {
+        return;
+    }
+    else if (result.Count > 1) {
+        return Promise.reject(new Error('findRoomByConnectionId returned more than one room'));
+    }
+    else if (result.Count == 1) {
+        return result.Items![0] as Room;
+    }
+}
+
 export async function saveRoom(room: Partial<Room>): Promise<void> {
     await dynamoDb.put({
-        TableName: process.env.DYNAMODB_ROOMS_TABLE!,
+        TableName: TABLE_NAME,
         Item: {
             createdAt: Date.now(),
             ttl: Math.floor(Date.now() / 1000) + ROOM_TTL_DEFAULT,
             ...room,
         },
+    }).promise();
+}
+
+export async function deleteRoom(room: Room): Promise<void> {
+    await dynamoDb.delete({
+        TableName: TABLE_NAME,
+        Key: { room: room.room },
     }).promise();
 }

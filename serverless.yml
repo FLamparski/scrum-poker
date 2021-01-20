@@ -18,33 +18,21 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.dynamoDbVotesTable}"
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.dynamoDbRoomsTable}"
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.dynamoDbRoomPlayersTable}"
+      Resource:
+        - !GetAtt DynamoDBVotesTable.Arn
+        - !Join ['/', [!GetAtt DynamoDBVotesTable.Arn, 'index', '*' ] ]
+        - !GetAtt DynamoDBRoomPlayersTable.Arn
+        - !Join ['/', [!GetAtt DynamoDBRoomPlayersTable.Arn, 'index', '*' ] ]
+        - !GetAtt DynamoDBRoomsTable.Arn
+        - !Join ['/', [!GetAtt DynamoDBRoomsTable.Arn, 'index', '*' ] ]
   logs:
     websocket: true
 
 custom:
   secrets: ${file(.settings/secrets.json)}
-  dynamoDbVotesTable: 'tb_votes'
-  dynamoDbRoomsTable: 'tb_rooms'
-  dynamoDbRoomPlayersTable: 'tb_room_players'
+  dynamoDbVotesTable: ${self:service}-${self:provider.stage}-tb_votes
+  dynamoDbRoomsTable: ${self:service}-${self:provider.stage}-tb_rooms
+  dynamoDbRoomPlayersTable: ${self:service}-${self:provider.stage}-tb_room_players
   buckets:
     STATIC_BUCKET_NAME: ${self:service}-${self:provider.stage}-static
   # s3Sync:
@@ -71,6 +59,15 @@ functions:
     events:
       - websocket:
           route: $default
+  disconnect:
+    handler: handler.websocketDisconnectedHandler
+    environment:
+      DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
+      DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
+      DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
+    events:
+      - websocket:
+          route: $disconnect
 
   nuxt:
     handler: handler.nuxtHandler
