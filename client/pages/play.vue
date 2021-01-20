@@ -88,7 +88,7 @@ export default {
             switch (message.type) {
                 case WSMessageType.PLAYER_JOINED:
                     if (message.playerName === this.playerNameInputValue) {
-                        this.roomName = this.roomNameInputValue;
+                        this.roomName = this.roomNameInputValue.toUpperCase();
                     }
                     break;
                 case WSMessageType.VOTES_CLEARED:
@@ -100,7 +100,7 @@ export default {
             const message: JoinRoomMessage = {
                 type: WSMessageType.JOIN_ROOM,
                 playerName: this.playerNameInputValue,
-                roomName: this.roomNameInputValue,
+                roomName: this.roomNameInputValue.toUpperCase(),
             };
             this.socket.send(JSON.stringify(message));
         },
@@ -162,5 +162,9 @@ export default {
 
 .choice.selected {
     box-shadow: 0px 0px 5px 2px #3fafaf;
+}
+
+#roomNameInput {
+    text-transform: uppercase;
 }
 </style>
