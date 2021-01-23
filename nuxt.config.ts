@@ -1,3 +1,5 @@
+const { wsApi } = require('./.settings/secrets.json');
+
 export default {
     head: {
         title: 'lol scrum poker',
@@ -24,4 +26,8 @@ export default {
     css: [
         '~/assets/style.css',
     ],
+
+    publicRuntimeConfig: {
+        websocketUrl: wsApi[process.env.LAMBDA_ENV || 'dev'],
+    },
 };

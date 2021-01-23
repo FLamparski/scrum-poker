@@ -44,7 +44,7 @@ export default {
         cardsRevealed: false,
     }),
     mounted() {
-        this.socket = new WebSocket('wss://jn2jpcj5o2.execute-api.eu-west-2.amazonaws.com/dev/');
+        this.socket = new WebSocket(this.$config.websocketUrl);
         this.socket.onopen = () => this.socketOpened();
         this.socket.onmessage = event => this.onSocketMessage(event);
     },

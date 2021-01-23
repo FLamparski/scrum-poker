@@ -11,9 +11,10 @@
     "build:client": "nuxt build -c ./nuxt.config.ts",
     "start:client": "nuxt start -c ./nuxt.config.ts",
     "generate:client": "nuxt generate -c ./nuxt.config.ts",
-    "deploy": "cross-env NODE_ENV=production LAMBDA_ENV=dev npm run build && sls deploy"
+    "deploy": "cross-env NODE_ENV=development LAMBDA_ENV=dev npm run build && sls deploy",
+    "deploy.prod": "cross-env NODE_ENV=production LAMBDA_ENV=prod npm run build && sls deploy --stage prod"
   },
-  "author": "ftw@cisco.com",
+  "author": "filiplamparski@gmail.com",
   "license": "ISC",
   "dependencies": {
     "@nuxt/http": "^0.1.2",
