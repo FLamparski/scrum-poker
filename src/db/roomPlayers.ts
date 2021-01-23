@@ -2,6 +2,7 @@ import RoomPlayer from '../models/RoomPlayer';
 import dynamoDb from './dynamoDb';
 
 const TABLE_NAME: string = process.env.DYNAMODB_ROOM_PLAYERS_TABLE!;
+const CONNECTION_ID_IDX_NAME: string = process.env.DYNAMODB_ROOM_PLAYERS_CONNECTION_ID_INDEX!;
 const ROOM_PLAYER_TTL_DEFAULT: number = 2 * 60 * 60;
 
 export async function saveRoomPlayer(player: Partial<RoomPlayer>): Promise<void> {
@@ -36,9 +37,10 @@ export async function findPlayersByRoomName(roomName: string): Promise<RoomPlaye
 export async function findPlayerByConnectionId(
     connectionId: string
 ): Promise<RoomPlayer | undefined> {
-    const result = await dynamoDb.scan({
+    const result = await dynamoDb.query({
         TableName: TABLE_NAME,
-        FilterExpression: 'connectionId = :connectionId',
+        IndexName: CONNECTION_ID_IDX_NAME,
+        KeyConditionExpression: 'connectionId = :connectionId',
         ExpressionAttributeValues: {
             ':connectionId': connectionId,
         },

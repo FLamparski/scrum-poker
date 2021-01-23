@@ -2,6 +2,7 @@ import Room from '../models/Room';
 import dynamoDb from './dynamoDb';
 
 const TABLE_NAME: string = process.env.DYNAMODB_ROOMS_TABLE!;
+const CONNECTION_ID_IDX_NAME: string = process.env.DYNAMODB_ROOMS_CONNECTION_ID_INDEX!;
 const ROOM_TTL_DEFAULT: number = 2 * 60 * 60;
 
 export async function findRoomByName(roomName: string): Promise<Room | undefined> {
@@ -16,9 +17,10 @@ export async function findRoomByName(roomName: string): Promise<Room | undefined
 }
 
 export async function findRoomByConnectionId(connectionId: string): Promise<Room | undefined> {
-    const result = await dynamoDb.scan({
+    const result = await dynamoDb.query({
         TableName: TABLE_NAME,
-        FilterExpression: 'connectionId = :connectionId',
+        IndexName: CONNECTION_ID_IDX_NAME,
+        KeyConditionExpression: 'connectionId = :connectionId',
         ExpressionAttributeValues: {
             ':connectionId': connectionId,
         },

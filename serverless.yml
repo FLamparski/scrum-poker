@@ -37,7 +37,9 @@ custom:
   secrets: ${file(.settings/secrets.json)}
   dynamoDbVotesTable: ${self:service}-${self:provider.stage}-tb_votes
   dynamoDbRoomsTable: ${self:service}-${self:provider.stage}-tb_rooms
+  dynamoDbRoomsTableConnectionIdIndex: ${self:custom.dynamoDbRoomsTable}-idx_connection_id
   dynamoDbRoomPlayersTable: ${self:service}-${self:provider.stage}-tb_room_players
+  dynamoDbRoomPlayersTableConnectionIdIndex: ${self:custom.dynamoDbRoomPlayersTable}-idx_connection_id
   buckets:
     STATIC_BUCKET_NAME: ${self:service}-${self:provider.stage}-static
   # s3Sync:
@@ -71,6 +73,8 @@ functions:
       DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
       DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
       DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
+      DYNAMODB_ROOMS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomsTableConnectionIdIndex}
+      DYNAMODB_ROOM_PLAYERS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomPlayersTableConnectionIdIndex}
     events:
       - websocket:
           route: $default
@@ -80,6 +84,8 @@ functions:
       DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
       DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
       DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
+      DYNAMODB_ROOMS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomsTableConnectionIdIndex}
+      DYNAMODB_ROOM_PLAYERS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomPlayersTableConnectionIdIndex}
     events:
       - websocket:
           route: $disconnect
@@ -116,6 +122,8 @@ resources:
         AttributeDefinitions:
           - AttributeName: room
             AttributeType: S
+          - AttributeName: connectionId
+            AttributeType: S
         KeySchema:
           - AttributeName: room
             KeyType: HASH
@@ -123,6 +131,13 @@ resources:
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:custom.dynamoDbRoomsTableConnectionIdIndex}
+            KeySchema:
+              - AttributeName: connectionId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
     DynamoDBRoomPlayersTable:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Delete
@@ -142,6 +157,13 @@ resources:
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:custom.dynamoDbRoomPlayersTableConnectionIdIndex}
+            KeySchema:
+              - AttributeName: connectionId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
     ClientStaticBucket:
       Type: AWS::S3::Bucket
       Properties:
