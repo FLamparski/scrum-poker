@@ -22,6 +22,7 @@
         v-else
         class="room-login-view">
         <h1>🃏 join room</h1>
+        <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
         <fieldset>
             <label for="roomNameInput">Room Code</label>
             <input
@@ -49,7 +50,6 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
 import { JoinRoomMessage, VoteMessage, WSMessage, WSMessageType } from '../../src/models/ws-messages';
 import HeaderBar from '../components/HeaderBar.vue';
 import VoteOptions from '../VoteOptions';
@@ -62,6 +62,8 @@ export default {
 
         playerNameInputValue: '',
         roomNameInputValue: '',
+
+        alertMsg: '',
 
         currentVote: null,
         VoteOptions,
@@ -91,8 +93,16 @@ export default {
                         this.roomName = this.roomNameInputValue.toUpperCase();
                     }
                     break;
+                case WSMessageType.PLAYER_JOIN_ERROR:
+                    this.alertMsg = message.error;
+                    break;
                 case WSMessageType.VOTES_CLEARED:
                     this.currentVote = null;
+                    break;
+                case WSMessageType.ROOM_DESTROYED:
+                    this.roomName = null;
+                    this.roomNameInputValue = '';
+                    this.alertMsg = 'The host has disconnected and the room is now closed';
                     break;
             }
         },
@@ -127,9 +137,16 @@ export default {
     margin: 0 auto;
 }
 
+.alert {
+    color: #cc0808;
+    border: 1px solid #cc0808;
+    padding: 15px 10px;
+}
+
 .room-login-view > fieldset {
     border: none;
     min-height: 48px;
+    padding: 10px 0;
 }
 
 .room-login-view > fieldset + fieldset {
@@ -166,5 +183,16 @@ export default {
 
 #roomNameInput {
     text-transform: uppercase;
+}
+
+@media screen and (max-width: 480px) {
+    .choices {
+        flex-direction: column;
+    }
+
+    .choices > .choice {
+        width: 100%;
+        margin: 5px 0;
+    }
 }
 </style>

@@ -68,6 +68,14 @@ export default {
                 case WSMessageType.PLAYER_JOINED:
                     this.players = message.allPlayerNames;
                     break;
+                case WSMessageType.PLAYER_LEFT:
+                    this.players = message.allPlayerNames;
+                    for (const playerName in this.votes) {
+                        if (!message.allPlayerNames.includes(playerName)) {
+                            delete this.votes[playerName];
+                        }
+                    }
+                    break;
                 case WSMessageType.VOTES_UPDATED:
                     this.votes = message.votes;
                     break;

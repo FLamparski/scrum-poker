@@ -5,6 +5,7 @@
   "main": "handler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build:client && npm run build:server",
     "build:server": "webpack -c ./src/webpack.config.js --progress",
     "dev:client": "nuxt -c ./nuxt.config.ts",
     "build:client": "nuxt build -c ./nuxt.config.ts",
