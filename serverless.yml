@@ -1,8 +1,13 @@
 service: hackday2020-scrum-poker
 
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
 frameworkVersion: '2'
+
+plugins:
+#  - serverless-s3-sync
+  - serverless-domain-manager
+  - serverless-apigw-binary
+  - serverless-plugin-common-excludes
+  # - serverless-plugin-include-dependencies
 
 provider:
   name: aws
@@ -49,9 +54,19 @@ custom:
     types:
       - '*/*'
 
+package:
+  excludeDevDependencies: true
+  include:
+    - dist/handler.js
+    - .nuxt/**
+  exclude:
+    - .git/**
+    - .settings/**
+    - node_modules/@types/**
+
 functions:
   onmessage:
-    handler: handler.websocketMessageHandler
+    handler: ./dist/handler.websocketMessageHandler
     environment:
       DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
       DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
@@ -60,7 +75,7 @@ functions:
       - websocket:
           route: $default
   disconnect:
-    handler: handler.websocketDisconnectedHandler
+    handler: ./dist/handler.websocketDisconnectedHandler
     environment:
       DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
       DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
@@ -70,7 +85,7 @@ functions:
           route: $disconnect
 
   nuxt:
-    handler: handler.nuxtHandler
+    handler: ./dist/handler.nuxtHandler
     events:
       - http: ANY /
       - http: ANY /{proxy+}
@@ -168,17 +183,3 @@ resources:
               Principal: '*'
             },
           ]
-
-plugins:
-  - serverless-plugin-typescript
-#  - serverless-s3-sync
-  - serverless-domain-manager
-  - serverless-apigw-binary
-
-package: # Optional deployment packaging configuration
-  include: # Specify the directories and files which should be included in the deployment package
-    - handler.js
-    - .nuxt/**
-    - src/**
-  exclude:
-    - .git/**
