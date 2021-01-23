@@ -91,6 +91,8 @@ functions:
 
   nuxt:
     handler: ./dist/handler.nuxtHandler
+    environment:
+      LAMBDA_ENV: ${self:provider.stage}
     events:
       - http: ANY /
       - http: ANY /{proxy+}
