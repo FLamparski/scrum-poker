@@ -3,16 +3,15 @@ service: hackday2020-scrum-poker
 frameworkVersion: '2'
 
 plugins:
-#  - serverless-s3-sync
+  - serverless-s3-sync
   - serverless-domain-manager
   - serverless-apigw-binary
   - serverless-plugin-common-excludes
-  # - serverless-plugin-include-dependencies
 
 provider:
   name: aws
   runtime: nodejs12.x
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: eu-west-2
   iamRoleStatements:
     - Effect: Allow
@@ -41,10 +40,10 @@ custom:
   dynamoDbRoomPlayersTable: ${self:service}-${self:provider.stage}-tb_room_players
   dynamoDbRoomPlayersTableConnectionIdIndex: ${self:custom.dynamoDbRoomPlayersTable}-idx_connection_id
   buckets:
-    STATIC_BUCKET_NAME: ${self:service}-${self:provider.stage}-static
-  # s3Sync:
-  #   - bucketName: ${self:custom.buckets.STATIC_BUCKET_NAME}
-  #     localDir: dist
+    ASSETS_BUCKET_NAME: ${self:service}-${self:provider.stage}-assets
+  s3Sync:
+    - bucketName: ${self:custom.buckets.ASSETS_BUCKET_NAME}
+      localDir: .nuxt/dist/client
   customDomain:
     domainName: ${self:custom.secrets.domainName.${self:provider.stage}}
     basePath: ''
@@ -95,6 +94,15 @@ functions:
     events:
       - http: ANY /
       - http: ANY /{proxy+}
+      - http:
+          path: /_nuxt/{proxy+}
+          method: ANY
+          integration: http-proxy
+          request:
+            uri: https://${self:custom.buckets.ASSETS_BUCKET_NAME}.s3.${self:provider.region}.amazonaws.com/{proxy}
+            parameters:
+              paths:
+                proxy: true
 
 resources:
   Resources:
@@ -164,16 +172,13 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-    ClientStaticBucket:
+    ClientAssetsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:custom.buckets.STATIC_BUCKET_NAME}
-        # WebsiteConfiguration:
-        #   IndexDocument: index.html
+        BucketName: ${self:custom.buckets.ASSETS_BUCKET_NAME}
         CorsConfiguration:
           CorsRules:
-            -
-              AllowedOrigins:
+            - AllowedOrigins:
                 - '*'
               AllowedHeaders:
                 - '*'
@@ -188,11 +193,11 @@ resources:
                 - x-amz-server-side-encryption
                 - x-amz-request-id
                 - x-amz-id-2
-    ClientStaticBucketPolicy:
+    ClientAssetsBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
         Bucket:
-          Ref: ClientStaticBucket
+          Ref: ClientAssetsBucket
         PolicyDocument:
           Version: '2012-10-17'
           Statement: [
@@ -200,7 +205,7 @@ resources:
               Action: ['s3:GetObject'],
               Effect: 'Allow',
               Resource: {
-                Fn::Join: ['', ['arn:aws:s3:::', { Ref: 'ClientStaticBucket' }, '/*']],
+                Fn::Join: ['', ['arn:aws:s3:::', { Ref: 'ClientAssetsBucket' }, '/*']],
               },
               Principal: '*'
             },
