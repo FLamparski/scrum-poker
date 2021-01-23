@@ -48,7 +48,7 @@ custom:
     domainName: ${self:custom.secrets.domainName.${self:provider.stage}}
     basePath: ''
     endpointType: regional
-    certificateName: '*.scrumpoker.lol'
+    certificateName: 'scrumpoker.lol'
     stage: ${self:provider.stage}
     createRoute53Record: true
   apigwBinary:
