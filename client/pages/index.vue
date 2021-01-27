@@ -3,7 +3,11 @@
     <h1>🃏 lol scrum poker</h1>
     <nuxt-link to="/play">Play</nuxt-link>
     <nuxt-link to="/host">Host Game</nuxt-link>
-    <p>Made by <a href="https://twitter.com/Minkovsky" target="_blank">@Minkovsky</a></p>
+    <p>
+      Made by <a href="https://twitter.com/Minkovsky" target="_blank">@Minkovsky</a>
+      | Licenced under <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank">AGPLv3</a>
+      | <a href="https://github.com/FLamparski/scrum-poker" target="_blank">Source on GitHub</a>
+    </p>
   </div>
 </template>
 

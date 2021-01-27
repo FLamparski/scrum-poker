@@ -1,5 +1,5 @@
 {
-  "name": "hackday2020-scrum-poker",
+  "name": "scrumpoker.lol",
   "version": "1.0.0",
   "description": "Serverless scrum poker with jackbox like interaction",
   "main": "handler.js",
@@ -15,7 +15,7 @@
     "deploy.prod": "cross-env NODE_ENV=production LAMBDA_ENV=prod npm run build && sls deploy --stage prod"
   },
   "author": "filiplamparski@gmail.com",
-  "license": "ISC",
+  "license": "AGPL3",
   "dependencies": {
     "@nuxt/http": "^0.1.2",
     "axios": "^0.21.1",

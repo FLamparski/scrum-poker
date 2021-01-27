@@ -5,5 +5,5 @@
 a scrum poker app using aws and the serverless framework. spun off from a hackday project i did
 some time ago.
 
-i'd put a proper licence here but for now it's probably not worth the effort. so for now you can
-enjoy this source-available mess.
+licenced under agplv3 - if you like it, and you run your own version, please share your
+improvements! (see LICENCE file)
