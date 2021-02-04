@@ -1,7 +1,10 @@
 <template>
     <div class="card-group">
         <div class="card" :class="{ 'card-hidden': !revealed }">{{ displayValue }}</div>
-        <p class="player-name">{{ playerName }}</p>
+        <p class="player-name">
+            {{ playerName }}
+            <span v-if="hasVoted" class="has-voted-icon">✅</span>
+        </p>
     </div>
 </template>
 
@@ -22,7 +25,10 @@ export default Vue.extend({
             }
 
             return VoteOptions.find(({ key }) => key === this.value)?.value || '?';
-        }
+        },
+        hasVoted(): boolean {
+            return this.value != null;
+        },
     }
 });
 </script>
@@ -53,5 +59,10 @@ export default Vue.extend({
 
     .player-name {
         margin: 5px 0;
+    }
+
+    .has-voted-icon {
+        display: block;
+        float: right;
     }
 </style>

@@ -5,7 +5,7 @@
         <header-bar
             :connected="connected"
             :roomName="roomName" />
-        
+
         <div class="choices">
             <button
                 v-for="voteOption in VoteOptions"
