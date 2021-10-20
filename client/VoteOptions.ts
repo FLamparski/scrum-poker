@@ -1,4 +1,5 @@
 export default [
+    { key: -2, value: '🍺' },
     { key: -1, value: '☕' },
     { key: 0, value: '0' },
     { key: 1, value: '1' },
