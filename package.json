@@ -19,7 +19,7 @@
   "dependencies": {
     "@nuxt/http": "^0.1.2",
     "axios": "^0.21.2",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "nuxt": "^2.14.12",
     "nuxt-start": "^2.14.12",
     "serverless-http": "^2.6.0",
