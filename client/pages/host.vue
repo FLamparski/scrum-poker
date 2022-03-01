@@ -30,6 +30,7 @@
 import { ClearVotesMessage, WSMessage, WSMessageType } from '../../src/models/ws-messages';
 import Card from '../components/Card.vue';
 import HeaderBar from '../components/HeaderBar.vue';
+import socketService from '../lib/socketService';
 
 export default {
     components: {
@@ -44,23 +45,24 @@ export default {
         cardsRevealed: false,
     }),
     mounted() {
-        this.socket = new WebSocket(this.$config.websocketUrl);
-        this.socket.onopen = () => this.socketOpened();
-        this.socket.onmessage = event => this.onSocketMessage(event);
+        socketService.connect(
+            this.$config.websocketUrl,
+            () => this.socketOpened(),
+            message => this.onSocketMessage(message),
+        )
     },
     beforeDestroy() {
-        this.socket.close();
+        socketService.close();
     },
     methods: {
         socketOpened() {
             this.connected = true;
 
-            this.socket.send(JSON.stringify({
+            socketService.send({
                 type: WSMessageType.CREATE_ROOM,
-            }));
+            });
         },
-        onSocketMessage(event: MessageEvent) {
-            const message: WSMessage = JSON.parse(event.data);
+        onSocketMessage(message: WSMessage) {
             switch (message.type) {
                 case WSMessageType.ROOM_CREATED:
                     this.roomName = message.roomName;
@@ -89,7 +91,7 @@ export default {
                 type: WSMessageType.CLEAR_VOTES,
                 roomName: this.roomName,
             };
-            this.socket.send(JSON.stringify(message));
+            socketService.send(message);
 
             this.cardsRevealed = false;
         },

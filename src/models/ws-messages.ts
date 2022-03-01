@@ -1,9 +1,11 @@
 export const enum WSMessageType {
+    CLIENT_PING = "CLIENT_PING",
     CREATE_ROOM = 'CREATE_ROOM',
     JOIN_ROOM = 'JOIN_ROOM',
     VOTE = 'VOTE',
     CLEAR_VOTES = 'CLEAR_VOTES',
 
+    SERVER_PONG = "SERVER_PONG",
     PLAYER_JOINED = 'PLAYER_JOINED',
     PLAYER_JOIN_ERROR = 'PLAYER_JOIN_ERROR',
     PLAYER_LEFT = 'PLAYER_LEFT',
@@ -74,6 +76,14 @@ export interface VotesUpdatedMessage {
     votes: Record<string, number>;
 }
 
+export interface ClientPingMessage {
+    type: WSMessageType.CLIENT_PING;
+}
+
+export interface ServerPongMessage {
+    type: WSMessageType.SERVER_PONG;
+}
+
 export type WSMessage =
     | CreateRoomMessage
     | JoinRoomMessage
@@ -85,4 +95,6 @@ export type WSMessage =
     | RoomCreatedMessage
     | RoomDestroyedMessage
     | VotesUpdatedMessage
-    | VotesClearedMessage;
+    | VotesClearedMessage
+    | ClientPingMessage
+    | ServerPongMessage;

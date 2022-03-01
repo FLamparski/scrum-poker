@@ -1,7 +1,7 @@
 import { ApiGatewayManagementApi } from 'aws-sdk';
-import { 
-    APIGatewayProxyEvent, 
-    APIGatewayProxyResult 
+import {
+    APIGatewayProxyEvent,
+    APIGatewayProxyResult
 } from 'aws-lambda';
 import { ClearVotesMessage, VoteMessage, WSMessage, WSMessageType } from '../models/ws-messages';
 import { saveRoomPlayer, findPlayersByRoomName, findPlayerByRoomNameAndConnectionId } from '../db/roomPlayers';
@@ -17,7 +17,7 @@ export default async function (event: APIGatewayProxyEvent): Promise<APIGatewayP
 
     const message: WSMessage = JSON.parse(event.body!);
 
-    switch(message.type) {
+    switch (message.type) {
         case WSMessageType.CREATE_ROOM:
             const roomName = await createRoom(event.requestContext.connectionId!);
             return respondToWebsocket(client, event, {
@@ -33,6 +33,10 @@ export default async function (event: APIGatewayProxyEvent): Promise<APIGatewayP
         case WSMessageType.CLEAR_VOTES:
             await clearVotes(client, message, event.requestContext.connectionId!);
             return { statusCode: 200, body: 'handled' };
+        case WSMessageType.CLIENT_PING:
+            return respondToWebsocket(client, event, {
+                type: WSMessageType.SERVER_PONG,
+            });
         default:
             return respondToWebsocket(client, event, {
                 error: `Unknown message type: ${message.type}`

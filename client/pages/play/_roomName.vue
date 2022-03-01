@@ -60,6 +60,7 @@ import {
 } from "../../../src/models/ws-messages";
 import HeaderBar from "../../components/HeaderBar.vue";
 import VoteOptions from "../../VoteOptions";
+import socketService from '../../lib/socketService';
 const STORAGE_KEY = "scrum-poker/playerName";
 
 export default {
@@ -78,14 +79,16 @@ export default {
     };
   },
   mounted() {
-    this.socket = new WebSocket(this.$config.websocketUrl);
-    this.socket.onopen = () => this.socketOpened();
-    this.socket.onmessage = (event) => this.onSocketMessage(event);
+    socketService.connect(
+        this.$config.websocketUrl,
+        () => this.socketOpened(),
+        message => this.onSocketMessage(message),
+    );
 
     this.playerNameInputValue = loadName();
   },
   beforeDestroy() {
-    this.socket.close();
+    socketService.close();
   },
   computed: {
     joinDisabled(): boolean {
@@ -96,8 +99,7 @@ export default {
     socketOpened() {
       this.connected = true;
     },
-    onSocketMessage(event: MessageEvent) {
-      const message: WSMessage = JSON.parse(event.data);
+    onSocketMessage(message: WSMessage) {
       switch (message.type) {
         case WSMessageType.PLAYER_JOINED:
           if (message.playerName === this.playerNameInputValue) {
@@ -129,7 +131,7 @@ export default {
         playerName: this.playerNameInputValue,
         roomName: this.roomNameInputValue.toUpperCase(),
       };
-      this.socket.send(JSON.stringify(message));
+      socketService.send(message);
       saveName(this.playerNameInputValue);
     },
     onVote(value: number) {
@@ -139,7 +141,7 @@ export default {
         roomName: this.roomName,
         value,
       };
-      this.socket.send(JSON.stringify(message));
+      socketService.send(message);
     },
   },
 };
