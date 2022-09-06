@@ -29,6 +29,7 @@
           type="text"
           name="roomNameInput"
           id="roomNameInput"
+          ref="roomNameInput"
         />
       </fieldset>
       <fieldset>
@@ -87,6 +88,7 @@ export default {
     );
 
     this.playerNameInputValue = loadName();
+    this.focusInput();
   },
   beforeDestroy() {
     socketService.close();
@@ -97,6 +99,9 @@ export default {
     },
   },
   methods: {
+    focusInput() {
+      this.$refs.roomNameInput.focus();
+    },
     socketOpened() {
       this.connected = true;
     },
