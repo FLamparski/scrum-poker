@@ -20,34 +20,35 @@
   <div class="room-login-view" v-else>
     <h1>🃏 join room</h1>
     <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
-    <fieldset>
-      <label for="roomNameInput">Room Code</label>
-      <input
-        v-model="roomNameInputValue"
-        placeholder="XKCD"
-        type="text"
-        name="roomNameInput"
-        id="roomNameInput"
-      />
-    </fieldset>
-    <fieldset>
-      <label for="playerNameInput">Your Name</label>
-      <input
-        v-model="playerNameInputValue"
-        placeholder="Mary Shelley"
-        type="text"
-        name="playerNameInput"
-        id="playerNameInput"
-      />
-    </fieldset>
-    <button
-      type="button"
-      class="join-button"
-      :disabled="joinDisabled"
-      @click="onJoinRoomClick"
-    >
-      Join
-    </button>
+    <form @submit.prevent="onJoinRoomClick">
+      <fieldset>
+        <label for="roomNameInput">Room Code</label>
+        <input
+          v-model="roomNameInputValue"
+          placeholder="XKCD"
+          type="text"
+          name="roomNameInput"
+          id="roomNameInput"
+        />
+      </fieldset>
+      <fieldset>
+        <label for="playerNameInput">Your Name</label>
+        <input
+          v-model="playerNameInputValue"
+          placeholder="Mary Shelley"
+          type="text"
+          name="playerNameInput"
+          id="playerNameInput"
+        />
+      </fieldset>
+      <button
+        type="submit"
+        class="join-button"
+        :disabled="joinDisabled"
+      >
+        Join
+      </button>
+    </form>
   </div>
 </template>
 
