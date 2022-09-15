@@ -8,6 +8,7 @@
       <button
         v-if="roomName"
         :class="{ blink_me: linkCopied }"
+        class="copy-link-button"
         @click="copyLink"
       >
         🔗
@@ -56,7 +57,7 @@ function getBaseUrl() {
 </script>
 
 <style scoped>
-button {
+.copy-link-button {
   cursor: pointer;
   border: none;
   background: transparent;
