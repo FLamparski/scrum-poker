@@ -20,7 +20,7 @@
   <div class="room-login-view" v-else>
     <h1>🃏 join room</h1>
     <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
-    <form @submit.prevent="onJoinRoomClick">
+    <form class="room-login-form" @submit.prevent="onJoinRoomClick">
       <fieldset>
         <label for="roomNameInput">Room Code</label>
         <input
@@ -166,7 +166,7 @@ function saveName(participantName: string) {
 </script>
 
 <style scoped>
-.room-login-view {
+.room-login-view, .room-login-form {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -174,17 +174,17 @@ function saveName(participantName: string) {
   margin: 0 auto;
 }
 
-.room-login-view > fieldset {
+.room-login-form > fieldset {
   border: none;
   min-height: 48px;
   padding: 10px 0;
 }
 
-.room-login-view > fieldset + fieldset {
+.room-login-form > fieldset + fieldset {
   margin-top: 10px;
 }
 
-.room-login-view > fieldset > input {
+.room-login-form > fieldset > input {
   display: block;
   font-size: 20px;
   width: 100%;
